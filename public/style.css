@@ -24,9 +24,10 @@ body {
 
 .tabs {
   display: flex;
-  gap: 0.5rem;
   border-bottom: 2px solid #ddd;
   padding-bottom: 0;
+  flex: 1;
+  justify-content: space-evenly;
 }
 
 .tabs button {
