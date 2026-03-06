@@ -67,7 +67,7 @@ fileInput.addEventListener('change', () => {
       ctx.drawImage(image, 0, 0, fit.width, fit.height);
       const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const maxBits = getCapacity(pixels);
-      const maxChars = Math.floor((maxBits - 40) / 8);
+      const maxChars = Math.floor((maxBits - 56) / 8);
       capacityDisplay.textContent = `0 / ${maxChars.toLocaleString()} chars available`;
 
       status.textContent = '';
@@ -83,7 +83,7 @@ messageInput.addEventListener('input', () => {
   if (!loadedImage) return;
   const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const maxBits = getCapacity(pixels);
-  const maxChars = Math.floor((maxBits - 40) / 8);
+  const maxChars = Math.floor((maxBits - 56) / 8);
   const typed = new TextEncoder().encode(messageInput.value).length;
   capacityDisplay.textContent = `${typed.toLocaleString()} / ${maxChars.toLocaleString()} chars available`;
 });

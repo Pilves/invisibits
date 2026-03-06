@@ -77,10 +77,21 @@ export function extractBits(imageData, numBits) {
 
 // --- Packet helpers (embedBits && extractBits) ---
 
+// magic bytes "IB" (0x49 0x42) to identify InvisiBits packets
+const MAGIC = [0x49, 0x42];
+const MAGIC_BITS = 16;
+const HEADER_BITS = MAGIC_BITS + 32 + 8; // magic + length + flags = 56 bits
+
 // flags byte: bit 0 = encrypted, bit 1 = compressed
 // 0x00 = plain, 0x01 = encrypted, 0x02 = compressed, 0x03 = both
 export function buildPacket(messageBytes, optionFlags) {
   let msgArray = [];
+  // 16-bit magic header ("IB") to identify valid packets
+  for (const byte of MAGIC) {
+    for (let i = 7; i >= 0; i--) {
+      msgArray.push((byte >> i) & 1);
+    }
+  }
   // 32-bit length header (how many bytes in the payload)
   for (let i = 31; i >= 0; i--) {
     msgArray.push((messageBytes.length >>> i) & 1);
@@ -98,20 +109,28 @@ export function buildPacket(messageBytes, optionFlags) {
 }
 
 export function parsePacket(imageData) {
-  // read first 40 bits: 32 for length + 8 for flags
-  let headerBits = extractBits(imageData, 40);
-  let msgLength = bitsToNumber(headerBits.slice(0, 32));
-  let optionFlags = bitsToNumber(headerBits.slice(32, 40));
+  // read first 56 bits: 16 magic + 32 length + 8 flags
+  let headerBits = extractBits(imageData, HEADER_BITS);
+
+  // verify magic bytes — catches JPEG corruption, non-steg images, other tools
+  let magicByte0 = bitsToNumber(headerBits.slice(0, 8));
+  let magicByte1 = bitsToNumber(headerBits.slice(8, 16));
+  if (magicByte0 !== MAGIC[0] || magicByte1 !== MAGIC[1]) {
+    throw new Error('No hidden message found — image may not contain InvisiBits data');
+  }
+
+  let msgLength = bitsToNumber(headerBits.slice(MAGIC_BITS, MAGIC_BITS + 32));
+  let optionFlags = bitsToNumber(headerBits.slice(MAGIC_BITS + 32, HEADER_BITS));
   let isEncrypted = (optionFlags & 1) === 1;
   let isCompressed = (optionFlags & 2) === 2;
 
-  if (msgLength <= 0 || msgLength * 8 + 40 > getCapacity(imageData)) {
+  if (msgLength <= 0 || msgLength * 8 + HEADER_BITS > getCapacity(imageData)) {
     throw new Error('No hidden message found');
   }
 
   // read all bits: header + payload
-  let allBits = extractBits(imageData, 40 + msgLength * 8);
-  let messageBytes = bitsToUint8Array(allBits.slice(40));
+  let allBits = extractBits(imageData, HEADER_BITS + msgLength * 8);
+  let messageBytes = bitsToUint8Array(allBits.slice(HEADER_BITS));
 
   return { messageBytes, isEncrypted, isCompressed };
 }

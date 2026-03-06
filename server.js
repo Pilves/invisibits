@@ -46,8 +46,18 @@ function decryptData(data, password) {
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 }
 
+const MAGIC = [0x49, 0x42]; // "IB"
+const HEADER_BITS = 16 + 32 + 8; // magic + length + flags = 56 bits
+
 function buildBitArray(payloadBytes, flags) {
   const bits = [];
+
+  // 16-bit magic header ("IB")
+  for (const byte of MAGIC) {
+    for (let i = 7; i >= 0; i--) {
+      bits.push((byte >> i) & 1);
+    }
+  }
 
   // 32-bit length header
   const length = payloadBytes.length;
@@ -167,20 +177,28 @@ app.post("/api/audio/decode", upload.single("audio"), (req, res) => {
     const wavBuffer = req.file.buffer;
     const sampleCount = (wavBuffer.length - WAV_HEADER_SIZE) / 2;
 
-    // read 40-bit header: 32 length + 8 flags
-    const headerBits = extractBitsFromSamples(wavBuffer, 40);
-    const payloadLength = bitsToNumber(headerBits.slice(0, 32));
-    const flags = bitsToNumber(headerBits.slice(32, 40));
+    // read 56-bit header: 16 magic + 32 length + 8 flags
+    const headerBits = extractBitsFromSamples(wavBuffer, HEADER_BITS);
+
+    // verify magic bytes
+    const magicByte0 = bitsToNumber(headerBits.slice(0, 8));
+    const magicByte1 = bitsToNumber(headerBits.slice(8, 16));
+    if (magicByte0 !== MAGIC[0] || magicByte1 !== MAGIC[1]) {
+      return res.status(400).json({ error: "No hidden message found — file may not contain InvisiBits data." });
+    }
+
+    const payloadLength = bitsToNumber(headerBits.slice(16, 48));
+    const flags = bitsToNumber(headerBits.slice(48, HEADER_BITS));
     const isEncrypted = (flags & 1) === 1;
     const isCompressed = (flags & 2) === 2;
 
-    if (payloadLength <= 0 || payloadLength * 8 + 40 > sampleCount) {
+    if (payloadLength <= 0 || payloadLength * 8 + HEADER_BITS > sampleCount) {
       return res.status(400).json({ error: "No hidden message found." });
     }
 
     // extract all bits (header + payload)
-    const allBits = extractBitsFromSamples(wavBuffer, 40 + payloadLength * 8);
-    let payload = bitsToBytes(allBits.slice(40));
+    const allBits = extractBitsFromSamples(wavBuffer, HEADER_BITS + payloadLength * 8);
+    let payload = bitsToBytes(allBits.slice(HEADER_BITS));
 
     // decrypt if needed
     if (isEncrypted) {
