@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>InvisiBits</title>
     <link href="style.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="js/main.js" type="module"></script>
+    <script src="js/encode.js" type="module"></script>
+    <script src="js/decode.js" type="module"></script>
+    <script src="js/detect.js" type="module"></script>
+    <script src="js/audio.js" type="module"></script>
   </head>
   <body>
     <!--Tab links-->
@@ -14,9 +19,126 @@
       <button class="link" data-tab="decode">Decode</button>
       <button class="link" data-tab="detect">Detect</button>
     </div>
-    <!--Tab content-->
-    <div data-tab-content="encode" ></div>
-    <div data-tab-content="decode" hidden></div>
-    <div data-tab-content="detect" hidden></div>
+
+    <!--Encode tab-->
+    <div data-tab-content="encode">
+      <div class="mode-toggle">
+        <button class="toggle-button active" data-mode="image" data-target="encode">Image</button>
+        <button class="toggle-button" data-mode="audio" data-target="encode">Audio</button>
+      </div>
+
+      <!--Image encode-->
+      <div data-encode-mode="image">
+        <div class="form-group">
+          <label for="encode-file">Choose an image (PNG or JPG, max 5MB)</label>
+          <input type="file" id="encode-file" accept=".png,.jpg,.jpeg" />
+          <img id="encode-preview" class="image-preview" hidden />
+        </div>
+
+        <div class="form-group">
+          <label for="encode-message">Message to hide</label>
+          <textarea id="encode-message" rows="5" placeholder="Type your secret message..."></textarea>
+          <span id="encode-capacity" class="capacity-info"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="encode-password">Password (optional)</label>
+          <input type="password" id="encode-password" placeholder="Leave empty for no encryption" />
+        </div>
+
+        <button id="encode-button" class="action-button">Encode</button>
+        <p class="note">Encoded images are always saved as PNG to preserve hidden data.</p>
+        <p id="encode-status" class="status"></p>
+      </div>
+
+      <!--Audio encode-->
+      <div data-encode-mode="audio" hidden>
+        <div class="form-group">
+          <label for="audio-encode-file">Choose a WAV file (max 5MB)</label>
+          <input type="file" id="audio-encode-file" accept=".wav" />
+        </div>
+
+        <div class="form-group">
+          <label for="audio-encode-message">Message to hide</label>
+          <textarea id="audio-encode-message" rows="5" placeholder="Type your secret message..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="audio-encode-password">Password (optional)</label>
+          <input type="password" id="audio-encode-password" placeholder="Leave empty for no encryption" />
+        </div>
+
+        <button id="audio-encode-button" class="action-button">Encode</button>
+        <p id="audio-encode-status" class="status"></p>
+      </div>
+    </div>
+
+    <!--Decode tab-->
+    <div data-tab-content="decode" hidden>
+      <div class="mode-toggle">
+        <button class="toggle-button active" data-mode="image" data-target="decode">Image</button>
+        <button class="toggle-button" data-mode="audio" data-target="decode">Audio</button>
+      </div>
+
+      <!--Image decode-->
+      <div data-decode-mode="image">
+        <div class="form-group">
+          <label for="decode-file">Choose a steg image (PNG or JPG)</label>
+          <input type="file" id="decode-file" accept=".png,.jpg,.jpeg" />
+        </div>
+
+        <div class="form-group">
+          <label for="decode-password">Password (if encrypted)</label>
+          <input type="password" id="decode-password" placeholder="Leave empty if not encrypted" />
+        </div>
+
+        <button id="decode-button" class="action-button">Decode</button>
+        <p id="decode-status" class="status"></p>
+
+        <div class="form-group">
+          <label for="decode-output">Hidden message</label>
+          <textarea id="decode-output" rows="5" readonly placeholder="Decoded message will appear here..."></textarea>
+        </div>
+
+        <button id="decode-download" class="action-button secondary" hidden>Download as .txt</button>
+      </div>
+
+      <!--Audio decode-->
+      <div data-decode-mode="audio" hidden>
+        <div class="form-group">
+          <label for="audio-decode-file">Choose a steg WAV file (max 5MB)</label>
+          <input type="file" id="audio-decode-file" accept=".wav" />
+        </div>
+
+        <div class="form-group">
+          <label for="audio-decode-password">Password (if encrypted)</label>
+          <input type="password" id="audio-decode-password" placeholder="Leave empty if not encrypted" />
+        </div>
+
+        <button id="audio-decode-button" class="action-button">Decode</button>
+        <p id="audio-decode-status" class="status"></p>
+
+        <div class="form-group">
+          <label for="audio-decode-output">Hidden message</label>
+          <textarea id="audio-decode-output" rows="5" readonly placeholder="Decoded message will appear here..."></textarea>
+        </div>
+
+        <button id="audio-decode-download" class="action-button secondary" hidden>Download as .txt</button>
+      </div>
+    </div>
+
+    <!--Detect tab-->
+    <div data-tab-content="detect" hidden>
+      <div class="form-group">
+        <label for="detect-file">Choose an image to analyze</label>
+        <input type="file" id="detect-file" accept=".png,.jpg,.jpeg" />
+      </div>
+
+      <button id="detect-button" class="action-button">Analyze</button>
+      <p id="detect-status" class="status"></p>
+
+      <div id="detect-result" class="detect-result"></div>
+      <canvas id="detect-canvas" class="detect-canvas" hidden></canvas>
+    </div>
   </body>
 </html>
