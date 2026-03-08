@@ -24,9 +24,10 @@ body {
 
 .tabs {
   display: flex;
-  gap: 0.5rem;
   border-bottom: 2px solid #ddd;
   padding-bottom: 0;
+  flex: 1;
+  justify-content: space-evenly;
 }
 
 .tabs button {
@@ -54,4 +55,145 @@ body {
 
 [data-tab-content] {
   padding: 2rem 0;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input[type="file"] {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input[type="password"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-group textarea[readonly] {
+  background: #f0f0ec;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 250px;
+  margin-top: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.capacity-info {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.action-button {
+  cursor: pointer;
+  padding: 0.65rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #111;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.action-button:hover {
+  background: #333;
+}
+
+.action-button.secondary {
+  background: #666;
+}
+
+.action-button.secondary:hover {
+  background: #888;
+}
+
+.status {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #c0392b;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: #999;
+  margin-bottom: 0.5rem;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-button {
+  cursor: pointer;
+  padding: 0.4rem 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.toggle-button.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.detect-result {
+  margin: 1rem 0;
+}
+
+.detect-result h3 {
+  margin-bottom: 0.25rem;
+}
+
+.detect-result table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.detect-result th,
+.detect-result td {
+  text-align: left;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.detect-result th {
+  font-weight: 500;
+  color: #555;
+}
+
+.detect-canvas {
+  max-width: 100%;
+  margin-top: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
